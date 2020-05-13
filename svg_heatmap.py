@@ -35,9 +35,12 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         Whether to draw a colorbar.
     cbar_kws : dict of key, value mappings, optional
         Keyword arguments for `fig.colorbar`.
-    size: SVG size in pixels
-    precision: number of decimals to use for coordinates
-    delim: delimiter for SVG elements
+    size: Tuple[int, int], optional
+        SVG size in pixels
+    precision: int, optional
+        number of decimals to use for coordinates
+    delim: str, optional
+        delimiter for SVG elements
 
     Returns
     -------
