@@ -91,7 +91,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
             x += (x_space - get_text_size(label)[0] - margin * font_size)
             return text_base.format(round(x, precision), round(y, precision), '', label)
 
-        locations = range(np.shape(data)[0 if orient == 'x' else 1])
+        locations = range(np.shape(data)[1 if orient == 'x' else 0])
         if (orient == 'y' and y_tick_labels is None) or (orient == 'x' and x_tick_labels is None):
             labels = list(map(str, locations))
         else:
@@ -124,9 +124,9 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
             x, y, w, h = np.round([x, y, w, h], precision)
             return '<rect x="{}"y="{}"width="{}"height="{}"style="fill:{};"/>'.format(x, y, w, h, color)
 
-        for x in range(np.shape(data)[0]):
-            for y in range(np.shape(data)[1]):
-                color = to_hex(cmap_fun(norm(data[x, y])))
+        for x in range(np.shape(data)[1]):
+            for y in range(np.shape(data)[0]):
+                color = to_hex(cmap_fun(norm(data[y, x])))
                 yield _get_rect(x_margin + x * x_size, y * y_size, x_size, y_size, color)
 
     def get_margin(orient='x') -> float:
@@ -161,10 +161,10 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         y_label, x_label = data.columns.name, data.index.name
         x_tick_labels, y_tick_labels = data.columns.values, data.index.values
         rotate_x_ticks = True
-        data = data.T.values
+        data = data.values
     else:
         x_label, y_label = '', ''
-        x_tick_labels, y_tick_labels = range(np.shape(data)[0]), range(np.shape(data)[1])
+        x_tick_labels, y_tick_labels = range(np.shape(data)[1]), range(np.shape(data)[0])
         rotate_x_ticks = False
 
     vmin = np.min(data) if vmin is None else vmin
@@ -181,8 +181,8 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     x_margin_left = cbar_w + .5 * font_size
     cbar_h = size[1] - y_margin
 
-    x_size = (size[0] - x_margin - x_margin_left) / np.shape(data)[0]
-    y_size = (size[1] - y_margin) / np.shape(data)[1]
+    x_size = (size[0] - x_margin - x_margin_left) / len(x_tick_labels)
+    y_size = (size[1] - y_margin) / len(y_tick_labels)
 
     x_ticks, y_ticks = get_ticks('x'), get_ticks('y')
     x_label, y_label = get_label('x'), get_label('y')
