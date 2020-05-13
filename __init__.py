@@ -1,1 +1,1 @@
-from .heatmap import svg_heatmap
+from .svg_heatmap import heatmap

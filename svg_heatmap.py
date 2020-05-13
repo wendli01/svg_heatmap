@@ -10,9 +10,9 @@ import numpy as np
 from io import BytesIO
 
 
-def svg_heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, cmap: str = 'magma',
-                cbar: bool = True, cbar_kws=None, size: Tuple[int, int] = (400, 300), precision: int = 2,
-                delim: str = '\n', ) -> str:
+def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, cmap: str = 'magma',
+            cbar: bool = True, cbar_kws=None, size: Tuple[int, int] = (400, 300), precision: int = 2,
+            delim: str = '\n', ) -> str:
     """Plot rectangular data as a color-encoded matrix.
 
     This  will draw the heatmap into a new SVG of the specified size. Part of
@@ -53,9 +53,9 @@ def svg_heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=Non
         :context: close-figs
 
         >>> import numpy as np; np.random.seed(0)
-        >>> import svg_heatmap
+        >>> from svg_heatmap import heatmap
         >>> uniform_data = np.random.rand(10, 12)
-        >>> svg = svg_heatmap(uniform_data)
+        >>> svg = heatmap(uniform_data)
     """
 
     def get_text_size(text: str, rotated: bool = False) -> Tuple[float, float]:
