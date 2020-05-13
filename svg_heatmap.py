@@ -1,7 +1,7 @@
 from typing import List, Tuple, Union
 
 from matplotlib.cm import get_cmap
-from matplotlib.colors import to_hex, Normalize
+from matplotlib.colors import to_hex, Normalize, LogNorm
 from matplotlib import pyplot as plt
 import pandas as pd
 import matplotlib as mpl
@@ -11,8 +11,8 @@ from io import BytesIO
 
 
 def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, cmap: str = 'magma',
-            cbar: bool = True, cbar_kws=None, size: Tuple[int, int] = (400, 300), precision: int = 2,
-            delim: str = '\n', ) -> str:
+            cbar: bool = True, cbar_kws=None, log_scaling: bool = False, size: Tuple[int, int] = (400, 300),
+            precision: int = 2, delim: str = '\n', ) -> str:
     """Plot rectangular data as a color-encoded matrix.
 
     This  will draw the heatmap into a new SVG of the specified size. Part of
@@ -35,12 +35,14 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         Whether to draw a colorbar.
     cbar_kws : dict of key, value mappings, optional
         Keyword arguments for `fig.colorbar`.
+    log_scaling: bool, optional
+        Whether to apply logarithmic scaling to the colorbar.
     size: Tuple[int, int], optional
-        SVG size in pixels
+        SVG size in pixels.
     precision: int, optional
-        number of decimals to use for coordinates
+        Number of decimals to use for coordinates.
     delim: str, optional
-        delimiter for SVG elements
+        Delimiter for SVG elements.
 
     Returns
     -------
@@ -173,7 +175,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     cbar_dpi = 30 * round(np.log10(np.max(size)))
 
     cmap_fun = get_cmap(cmap)
-    norm = Normalize(vmin=vmin, vmax=vmax)
+    norm = Normalize(vmin=vmin, vmax=vmax) if not log_scaling else LogNorm(vmin, vmax)
 
     x_margin, y_margin = get_margin('x'), get_margin('y')
     x_margin_left = cbar_w + .5 * font_size
