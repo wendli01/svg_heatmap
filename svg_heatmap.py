@@ -12,7 +12,7 @@ from io import BytesIO
 
 def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, cmap: str = 'magma',
             cbar: bool = True, cbar_kws=None, log_scaling: bool = False, size: Tuple[int, int] = (400, 300),
-            precision: int = 2, delim: str = '\n', ) -> str:
+            precision: int = 2, delim: str = '\n', svg_cbar: bool = True) -> str:
     """Plot rectangular data as a color-encoded matrix.
 
     This  will draw the heatmap into a new SVG of the specified size. Part of
@@ -42,7 +42,11 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     precision: int, optional
         Number of decimals to use for coordinates.
     delim: str, optional
-        Delimiter for SVG elements.
+        Delimiter for concatenating SVG elements.
+    svg_cbar: bool, optional
+        Whether to embed the colobar into the SVG as a SVG generated through
+        pyplot or as png. The SVG is quite space-inefficient and still uses a
+        rastrized gradient image.
 
     Returns
     -------
@@ -138,12 +142,21 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         return label_space + tick_label_space + font_size
 
     def get_colobar_img(scaling: float = 1.25) -> str:
-        def encode_plot(fig: plt.Figure):
+        def embed_plot_png():
             with BytesIO() as buf:
-                fig.canvas.print_png(buf)
+                plt.savefig(buf, format='png')
                 img_data = binascii.b2a_base64(buf.getvalue()).decode()
             img_html = '<image x="{}"y="{}"height="{}"width="{}"xlink:href="data:image/png;base64,{}">'
             return img_html.format(size[0] - cbar_w, 0, cbar_h, cbar_w, img_data)
+
+        def embed_plot_svg():
+            with BytesIO() as buf:
+                plt.savefig(buf, format='svg')
+                svg_data = buf.getvalue().decode()
+            svg_data_lines = svg_data.split('\n')
+            svg_data = '\n'.join(svg_data_lines[10:-2])
+            x, y, h, w = size[0] - cbar_w, 0, cbar_h, cbar_w
+            return '<svg x="{}"y="{}"height="{}"width="{}">'.format(x, y, h, w) + svg_data + '</svg>'
 
         cbar_width_in = cbar_w / cbar_dpi * scaling
         cbar_height_in = cbar_h / cbar_dpi * scaling
@@ -151,7 +164,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         plt.axis('off')
         cax = fig.add_axes([0, 0, 0.25, 1])
         mpl.colorbar.ColorbarBase(cax, cmap=cmap_fun, norm=norm, orientation='vertical', **cbar_kws)
-        cb = encode_plot(fig)
+        cb = embed_plot_svg() if svg_cbar else embed_plot_png()
         plt.close()
         return cb
 
