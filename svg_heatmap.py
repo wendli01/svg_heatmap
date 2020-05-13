@@ -67,13 +67,15 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
             transforms = ''
             if orient == 'x':
                 x = x_margin + x_size * (loc + .5)
-                y = size[1] - 2 * font_size
+                # distance to x_label
+                y = size[1] - (2 * font_size if x_label not in ('', None) else 0)
                 if rotate_x_ticks:
-                    rotation_coords = round(x, precision), round(y - .5 * font_size, precision)
+                    rotation_coords = round(x, precision), round(y - .5 * letter_h, precision)
                     transforms = 'transform="rotate(270 {}, {})"'.format(*rotation_coords)
             else:
                 y = y_size * (loc + .5) + .5 * font_size
-                x = 2 * font_size
+                # distance to y_label
+                x = (2 * font_size if y_label not in ('', None) else 0)
             return text_base.format(round(x, precision), round(y, precision), transforms, label)
 
         locations = range(np.shape(data)[0 if orient == 'x' else 1])
@@ -95,7 +97,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
             label = x_label
             x = font_size
             y = .5 * size[1] - .5 * y_margin + .5 * get_text_size(label)[0]
-            transforms = 'transform="rotate(270 {}, {})"'.format(x, y - .5 * font_size)
+            transforms = 'transform="rotate(270 {}, {})"'.format(x, y - .5 * letter_h)
 
         if label is None:
             return ''
@@ -115,8 +117,11 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
 
     def get_margin(orient='x') -> float:
         labels = y_tick_labels if orient == 'x' else x_tick_labels
-        letter_size = font_size if (orient == 'y' and not rotate_x_ticks) else .75 * font_size
-        return 2 * font_size + np.max([len(str(l)) for l in labels]) * letter_size
+        rotated = orient == 'y' and not rotate_x_ticks
+        tick_label_space = np.max([get_text_size(str(l), rotated=rotated)[0] for l in labels])
+        label = y_label if orient == 'x' else x_label
+        label_space = 2 * font_size if label not in ('', None) else 0
+        return label_space + tick_label_space + font_size
 
     def get_colobar_img(scaling: float = 1.25) -> str:
         def encode_plot(fig: plt.Figure):
