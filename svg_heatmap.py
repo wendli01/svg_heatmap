@@ -73,7 +73,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
                     rotation_coords = round(x, precision), round(y - .5 * letter_h, precision)
                     transforms = 'transform="rotate(270 {}, {})"'.format(*rotation_coords)
             else:
-                y = y_size * (loc + .5) + .5 * font_size
+                y = y_size * loc + letter_h
                 # distance to y_label
                 x = (2 * font_size if y_label not in ('', None) else 0)
             return text_base.format(round(x, precision), round(y, precision), transforms, label)
