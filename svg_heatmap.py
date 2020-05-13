@@ -11,8 +11,8 @@ from io import BytesIO
 
 
 def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, cmap: str = 'magma',
-            cbar: bool = True, cbar_kws=None, log_scaling: bool = False, size: Tuple[int, int] = (400, 300),
-            precision: int = 2, delim: str = '\n', svg_cbar: bool = True) -> str:
+            cbar: bool = True, cbar_kws=None, square: bool = True, log_scaling: bool = False,
+            size: Tuple[int, int] = (400, 300), precision: int = 2, delim: str = '\n', svg_cbar: bool = True) -> str:
     """Plot rectangular data as a color-encoded matrix.
 
     This  will draw the heatmap into a new SVG of the specified size. Part of
@@ -35,6 +35,8 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         Whether to draw a colorbar.
     cbar_kws : dict of key, value mappings, optional
         Keyword arguments for `fig.colorbar`.
+    square: bool, optional
+        If True, set the Axes aspect to “equal” so each cell will be square-shaped.
     log_scaling: bool, optional
         Whether to apply logarithmic scaling to the colorbar.
     size: Tuple[int, int], optional
@@ -196,6 +198,10 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
 
     x_size = (size[0] - x_margin - x_margin_left) / len(x_tick_labels)
     y_size = (size[1] - y_margin) / len(y_tick_labels)
+
+    if square:
+        x_size, y_size = [np.max([x_size, y_size])] * 2
+        size = (x_margin + len(x_tick_labels) * x_size + x_margin_left, y_margin + len(y_tick_labels) * y_size)
 
     x_ticks, y_ticks = get_ticks('x'), get_ticks('y')
     x_label, y_label = get_label('x'), get_label('y')
