@@ -11,7 +11,7 @@ from io import BytesIO
 
 
 def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, cmap: str = 'magma',
-            cbar: bool = True, cbar_kws=None, square: bool = True, log_scaling: bool = False,
+            cbar: bool = True, cbar_kws=None, square: bool = False, log_scaling: bool = False,
             size: Tuple[int, int] = (400, 300), precision: int = 2, delim: str = '\n', svg_cbar: bool = True) -> str:
     """Plot rectangular data as a color-encoded matrix.
 
