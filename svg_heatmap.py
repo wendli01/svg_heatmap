@@ -62,21 +62,29 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         width, height = len(str(text)) * letter_w, letter_h
         return (height, width) if rotated else (width, height)
 
-    def get_ticks(orient='x') -> List[str]:
-        def get_tick(loc: float, label: str) -> str:
+    def get_ticks(orient='x', margin=1.0) -> List[str]:
+        def get_x_tick(loc: float, label: str) -> str:
             transforms = ''
-            if orient == 'x':
-                x = x_margin + x_size * (loc + .5)
-                # distance to x_label
-                y = size[1] - (2 * font_size if x_label not in ('', None) else 0)
-                if rotate_x_ticks:
-                    rotation_coords = round(x, precision), round(y - .5 * letter_h, precision)
-                    transforms = 'transform="rotate(270 {}, {})"'.format(*rotation_coords)
-            else:
-                y = y_size * loc + letter_h
-                # distance to y_label
-                x = (2 * font_size if y_label not in ('', None) else 0)
+            x = x_margin + x_size * (loc + .5)
+            # distance to x_label
+            y = size[1] - (2 * font_size if x_label not in ('', None) else 0)
+
+            label_size = get_text_size(label)[0 if rotate_x_ticks else 1]
+            y_space = y_margin - (size[1] - y)
+            y -= (y_space - label_size - margin * font_size)
+
+            if rotate_x_ticks:
+                rotation_coords = round(x, precision), round(y - .5 * letter_h, precision)
+                transforms = 'transform="rotate(270 {}, {})"'.format(*rotation_coords)
             return text_base.format(round(x, precision), round(y, precision), transforms, label)
+
+        def get_y_tick(loc: float, label: str) -> str:
+            y = y_size * loc + letter_h
+            # distance to y_label
+            x = (2 * font_size if y_label not in ('', None) else 0)
+            x_space = x_margin - x
+            x += (x_space - get_text_size(label)[0] - margin * font_size)
+            return text_base.format(round(x, precision), round(y, precision), '', label)
 
         locations = range(np.shape(data)[0 if orient == 'x' else 1])
         if (orient == 'y' and y_tick_labels is None) or (orient == 'x' and x_tick_labels is None):
@@ -85,7 +93,8 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
             labels = y_tick_labels if orient == 'y' else x_tick_labels
 
         text_base = '<text x="{}"y="{}"{}>{}</text>'
-        ticks = [get_tick(loc, label) for loc, label in zip(locations, labels)]
+        tick_fun = get_x_tick if orient == 'x' else get_y_tick
+        ticks = [tick_fun(loc, label) for loc, label in zip(locations, labels)]
         return ['<g font-family="monospace"font-size="{}">'.format(font_size), *ticks, '</g>']
 
     def get_label(orient='x') -> str:
