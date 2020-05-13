@@ -171,11 +171,17 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         plt.close()
         return cb
 
-    def subsample_ticks(tick_locations: List[int], tick_labels: List[str], space: float) -> Tuple[List[int], List[str]]:
+    def subsample_ticks(tick_locations: List[int], tick_labels: List[str], space: float, rotated: bool,
+                        margin: float = .25) -> Tuple[List[int], List[str]]:
         def get_required_space(tick_labels):
-            return np.sum(list(map(get_text_size, tick_labels)))
+            def get_ts(t):
+                return get_text_size(t, rotated=rotated)
 
-        ratio = get_required_space(tick_labels) / space
+            if rotated:
+                return letter_h
+            return np.max(list(map(get_ts, tick_labels)), axis=0)[0]
+
+        ratio = get_required_space(tick_labels) / space * (1 + margin)
         if ratio >= 1:
             subsampling_factor = int(np.ceil(ratio))
             return tick_locations[::subsampling_factor], tick_labels[::subsampling_factor]
@@ -214,9 +220,8 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         x_size, y_size = [np.max([x_size, y_size])] * 2
         size = (x_margin + len(x_tick_labels) * x_size + x_margin_left, y_margin + len(y_tick_labels) * y_size)
 
-    x_space, y_space = size[0] - x_margin - x_margin_left, size[1] - y_margin
-    x_tick_locations, x_tick_labels = subsample_ticks(range(len(x_tick_labels)), x_tick_labels, x_space)
-    y_tick_locations, y_tick_labels = subsample_ticks(range(len(y_tick_labels)), y_tick_labels, y_space)
+    x_tick_locations, x_tick_labels = subsample_ticks(range(len(x_tick_labels)), x_tick_labels, x_size, rotate_x_ticks)
+    y_tick_locations, y_tick_labels = subsample_ticks(range(len(y_tick_labels)), y_tick_labels, y_size, True)
 
     x_ticks, y_ticks = get_ticks('x'), get_ticks('y')
     x_label, y_label = get_label('x'), get_label('y')
