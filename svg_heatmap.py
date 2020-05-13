@@ -152,7 +152,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     vmax = np.max(data) if vmax is None else vmax
 
     font_size, cbar_w = 4 * round(np.log10(np.max(size))), 15 * round(np.log10(np.max(size))) if cbar else 0
-    letter_h, letter_w = np.floor(font_size * 1.1875), np.float(.61 * font_size)
+    letter_h, letter_w = np.floor(font_size * 1.1875), .61 * font_size
     cbar_dpi = 30 * round(np.log10(np.max(size)))
 
     cmap_fun = get_cmap(cmap)
