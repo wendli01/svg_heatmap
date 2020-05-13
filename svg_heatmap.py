@@ -129,7 +129,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     def get_grid() -> List[str]:
         def _get_rect(x, y, w, h, color):
             x, y, w, h = np.round([x, y, w, h], precision)
-            return '<rect x="{}"y="{}"width="{}"height="{}"style="fill:{};"/>'.format(x, y, w, h, color)
+            return '<rect x="{}"y="{}"width="{}"height="{}"fill="{}"/>'.format(x, y, w, h, color)
 
         for x in range(np.shape(data)[1]):
             for y in range(np.shape(data)[0]):
