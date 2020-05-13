@@ -59,8 +59,8 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     """
 
     def get_text_size(text: str, rotated: bool = False) -> Tuple[float, float]:
-        letter_w, letter_h = (font_size, .75 * font_size) if rotated else (.75 * font_size, font_size)
-        return len(str(text)) * letter_w, letter_h
+        width, height = len(str(text)) * letter_w, letter_h
+        return (height, width) if rotated else (width, height)
 
     def get_ticks(orient='x') -> List[str]:
         def get_tick(loc: float, label: str) -> str:
@@ -152,6 +152,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     vmax = np.max(data) if vmax is None else vmax
 
     font_size, cbar_w = 4 * round(np.log10(np.max(size))), 15 * round(np.log10(np.max(size))) if cbar else 0
+    letter_h, letter_w = np.floor(font_size * 1.1875), np.float(.61 * font_size)
     cbar_dpi = 30 * round(np.log10(np.max(size)))
 
     cmap_fun = get_cmap(cmap)
