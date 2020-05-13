@@ -76,17 +76,18 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     def get_ticks(orient='x', margin=1.0) -> List[str]:
         def get_x_tick(loc: float, label: str) -> str:
             transforms = ''
-            x = x_margin + x_size * (loc + .5)
+            label_w, label_h = get_text_size(label, rotated=rotate_x_ticks)
+
+            x = x_margin + x_size * (loc + .5) - .5 * label_w
             # distance to x_label
             y = size[1] - (2 * font_size if x_label not in ('', None) else 0)
 
-            label_size = get_text_size(label)[0 if rotate_x_ticks else 1]
             y_space = y_margin - (size[1] - y)
-            y -= (y_space - label_size - margin * font_size)
+            y -= (y_space - label_h - margin * font_size)
 
             if rotate_x_ticks:
-                rotation_coords = round(x, precision), round(y - .5 * letter_h, precision)
-                transforms = 'transform="rotate(270 {}, {})"'.format(*rotation_coords)
+                x += label_w
+                transforms = 'transform="rotate(270 {}, {})"'.format(x, y)
             return text_base.format(round(x, precision), round(y, precision), transforms, label)
 
         def get_y_tick(loc: float, label: str) -> str:
