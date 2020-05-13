@@ -98,7 +98,7 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
             x += (x_space - get_text_size(label)[0] - margin * font_size)
             return text_base.format(round(x, precision), round(y, precision), '', label)
 
-        locations = range(np.shape(data)[1 if orient == 'x' else 0])
+        locations = x_tick_locations if orient == 'x' else y_tick_locations
         if (orient == 'y' and y_tick_labels is None) or (orient == 'x' and x_tick_labels is None):
             labels = list(map(str, locations))
         else:
@@ -171,6 +171,16 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
         plt.close()
         return cb
 
+    def subsample_ticks(tick_locations: List[int], tick_labels: List[str], space: float) -> Tuple[List[int], List[str]]:
+        def get_required_space(tick_labels):
+            return np.sum(list(map(get_text_size, tick_labels)))
+
+        ratio = get_required_space(tick_labels) / space
+        if ratio >= 1:
+            subsampling_factor = int(np.ceil(ratio))
+            return tick_locations[::subsampling_factor], tick_labels[::subsampling_factor]
+        return tick_locations, tick_labels
+
     if cbar_kws is None:
         cbar_kws = {}
     if isinstance(data, pd.DataFrame):
@@ -203,6 +213,10 @@ def heatmap(data: Union[np.ndarray, pd.DataFrame, list], vmin=None, vmax=None, c
     if square:
         x_size, y_size = [np.max([x_size, y_size])] * 2
         size = (x_margin + len(x_tick_labels) * x_size + x_margin_left, y_margin + len(y_tick_labels) * y_size)
+
+    x_space, y_space = size[0] - x_margin - x_margin_left, size[1] - y_margin
+    x_tick_locations, x_tick_labels = subsample_ticks(range(len(x_tick_labels)), x_tick_labels, x_space)
+    y_tick_locations, y_tick_labels = subsample_ticks(range(len(y_tick_labels)), y_tick_labels, y_space)
 
     x_ticks, y_ticks = get_ticks('x'), get_ticks('y')
     x_label, y_label = get_label('x'), get_label('y')
